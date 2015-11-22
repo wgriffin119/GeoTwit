@@ -38,30 +38,43 @@ var tip = d3.tip();
 
 //load files in parallel with Queue.js library
 queue()
-    .defer(d3.json, "./map.json")
-    .defer(d3.tsv, "sample.tsv", function(d) { 
-      wordPercentageById.set(d.id, +d.wordPercentage); 
-      followerById.set(d.id, +d.avgFollowerCount);
+    .defer(function(url, callback) {
+      d3.json(url, function(error, result) {
+        console.log("map ready");
+        callback(error, result);
+      });
+    }, "./map.json")
+    .defer(function(url, callback) {
+      d3.json(url, function(error, d) {
+        console.log("data ready");
+        d.locations.forEach(function(curr) {
+          wordPercentageById.set(curr.location, +curr.wordPercentage); 
+          followerById.set(curr.location, +curr.avgFollowerCount);
 
-      //define our tooltip, which will pop up above each state when the state is moused over
-      tip.attr({
-            'class': 'd3-tip'
-          })    
-         .offset([0, 75])     
-         .html(function(data){
-            return "<span style='color:#66ccff'>" + stateFill[data.id] 
-              + "</span><br><span>Percentage of Word Occurrence:</span> <span style='color:white' 'text-align: center'>" 
-              + wordPercentageById.get(data.id) 
-              + "</span>,<br> <span>Average Follower Count:</span> <span style='color:white'>" 
-              + followerById.get(data.id) + "</span>";
-          
-         });
-      svg.call(tip);
-    })
+          //define our tooltip, which will pop up above each state when the state is moused over
+          tip.attr({
+                'class': 'd3-tip'
+              })    
+             .offset([0, 75])     
+             .html(function(data){
+                return "<span style='color:#66ccff'>" + stateFill[data.id] 
+                  + "</span><br><span>Percentage of Word Occurrence:</span> <span style='color:white' 'text-align: center'>" 
+                  + wordPercentageById.get(data.id) 
+                  + "</span>,<br> <span>Average Follower Count:</span> <span style='color:white'>" 
+                  + followerById.get(data.id) + "</span>";
+             });
+          svg.call(tip);
+
+        })
+        callback(error, d);
+      });
+        //console.log("complete");
+    }, "./syria.json")
     .await(ready);
 
 
 function ready(error, us) {
+  console.log("ready");
   if (error) throw error;
 
   //find the max of all word percentage values
