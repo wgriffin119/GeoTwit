@@ -1,3 +1,5 @@
+//sample heatmap visualization, to be used dynamically with tweets we have stored in Mongo
+
 //mapping of state indices in our map JSON file to state names
 var stateFill = {1:'Alabama',2:'Alaska',4:'Arizona',5:'Arkansas',6:'California',8:'Colorado',
                  9:'Connecticut',10:'Delaware',11:'District of Columbia',12:'Florida',13:'Georgia',
@@ -41,6 +43,7 @@ queue()
       wordPercentageById.set(d.id, +d.wordPercentage); 
       followerById.set(d.id, +d.avgFollowerCount);
 
+      //define our tooltip, which will pop up above each state when the state is moused over
       tip.attr({
             'class': 'd3-tip'
           })    
