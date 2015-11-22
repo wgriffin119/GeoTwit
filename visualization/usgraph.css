@@ -1,12 +1,17 @@
-
 h1{
   font: 35px sans-serif;
   text-align: center;
 }
 
 svg {
-  margin: auto;
+  margin-left: 10%;
+  margin-right: 10%;
   padding-left: 75px;
+  padding-right: 75px;
+  border-width: medium;
+  border-style: double;
+  border-color: gray;  
+  background-color: #E8E8E8;
 }
 
 .states {
@@ -25,6 +30,7 @@ svg {
   border-radius: 2px;
   font-family: sans-serif;
 }
+
 
 tip.span{
   text-align: center;

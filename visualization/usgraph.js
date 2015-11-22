@@ -18,6 +18,8 @@ var width = 960,
 //store the values we will be using from our imported file in two maps
 var wordPercentageById = d3.map();
 var followerById = d3.map();
+var wordCountById = d3.map();
+var tweetCountById = d3.map();
 
 //utilize an albers projection of the United States to display our map
 var projection = d3.geo.albersUsa()
@@ -50,17 +52,23 @@ queue()
         d.locations.forEach(function(curr) {
           wordPercentageById.set(curr.location, +curr.wordPercentage); 
           followerById.set(curr.location, +curr.avgFollowerCount);
+          wordCountById.set(curr.location, +curr.wordCount);
+          tweetCountById.set(curr.location, +curr.tweetCount);
 
-          //define our tooltip, which will pop up above each state when the state is moused over
+
           tip.attr({
                 'class': 'd3-tip'
               })    
              .offset([0, 75])     
              .html(function(data){
                 return "<span style='color:#66ccff'>" + stateFill[data.id] 
-                  + "</span><br><span>Percentage of Word Occurrence:</span> <span style='color:white' 'text-align: center'>" 
+                  + "</span><br><span>Percentage of Word Occurrence:</span> <span style='color:#A9E2F3' 'text-align: center'>" 
                   + wordPercentageById.get(data.id) 
-                  + "</span>,<br> <span>Average Follower Count:</span> <span style='color:white'>" 
+                  + "</span>,<br><span>Total Number of Tweets:</span> <span style='color:#A9E2F3' 'text-align: center'>" 
+                  + tweetCountById.get(data.id) 
+                  + "</span>,<br><span>Total Number of Tweets Containing Word:</span> <span style='color:#A9E2F3' 'text-align: center'>" 
+                  + wordCountById.get(data.id) 
+                  + "</span>,<br><span>Average Follower Count:</span> <span style='color:#A9E2F3'>" 
                   + followerById.get(data.id) + "</span>";
              });
           svg.call(tip);
@@ -71,6 +79,7 @@ queue()
         //console.log("complete");
     }, "./syria.json")
     .await(ready);
+
 
 
 function ready(error, us) {
@@ -92,7 +101,14 @@ function ready(error, us) {
      .selectAll("path")
      .data(topojson.feature(us, us.objects.states).features)
      .enter().append("path")
-     .attr("fill", function(d) {return d3.hsl(200, .5, xScale(wordPercentageById.get(d.id))); })
+     .attr("fill", function(d) {
+        curr = wordPercentageById.get(d.id);
+        if(curr == 0) {
+          return d3.hsl("#ffffff");
+        } else {
+          return d3.hsl(200, .5, xScale(wordPercentageById.get(d.id))); 
+        }
+      })
      .attr("d", path)
      .on('mouseover', tip.show)
      .on('mouseout', tip.hide);
