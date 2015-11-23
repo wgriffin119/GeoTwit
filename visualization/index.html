@@ -32,9 +32,6 @@
   </head>
 
   <body>
-   
-    <a class="navbar-brand" href="#">GeoTwit</a>
-
 
     <div class="container">
 
@@ -45,17 +42,19 @@
 
     </div><!-- /.container -->
     
-    <!-- search button -->
-    <div class="row">
-      <div class="col-lg-6">
-        <div class="input-group">
-          <input type="text" class="form-control" placeholder="Search for..." allign="center" id="searchInput">
-          <span class="input-group-btn">
-            <button class="btn btn-default" type="button" id="searchButton">Go!</button>
-          </span>
-        </div><!-- /input-group -->
-      </div><!-- /.col-lg-6 -->
-    </div><!-- /.row -->
+    <!-- search bar and button -->
+    <div class="container">
+      <div class="row">
+        <div class="span12">
+          <form id="custom-search-form" class="form-search form-horizontal pull-right">
+            <div class="input-append span12">
+              <input type="text"  placeholder="Search" id="searchInput">
+              <button type="button" class="btn" id="searchButton"><i class="icon-search"></i></button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
 
 
     
