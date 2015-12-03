@@ -97,20 +97,39 @@ def structureDict(properties, data, word):
 		obj['locations'].append(currDict)
 	return obj
 
+def convertToDict(json):
+	newDict = {}
+	newDict['word'] = str(json['word'])
+	newLocations = []
+	for location in json['locations']:
+		newLocation = {}
+		newLocation['tweetCount'] = location['tweetCount']
+		newLocation['wordCount'] = location['wordCount']
+		newLocation['location'] = location['location']
+		newLocation['wordPercentage'] = str(location['wordPercentage'])
+		newLocation['avgFollowerCount'] = location['avgFollowerCount']
+		newLocations.append(newLocation)
+	newDict['locations'] = newLocations
+	return newDict
+
 @app.route('/word', methods=['GET'])
 def main():
 	""" If we find that the file referring to a given word has already been created
 		we simply retrieve it from the database. Otherwise, generate the file """
 	word = request.args.get('word')
+	callback = request.args.get('callback')
 	curr = words.find_one({'word': word})
 	if(curr == None):
 		tweetData = filterTweets(word)
 		properties = ["location", "wordCount", "avgFollowerCount", "tweetCount", "wordPercentage"]
 		jsonDict = structureDict(properties, tweetData, word)
 		words.insert_one(jsonDict)
-		return encoder.encode(jsonDict['locations'])
+		jsonDict.pop("_id", None)
+		jsonDict['word'] = str(jsonDict['word'])
+		return '{0}({1})'.format(callback, jsonDict)
 	else:
-		return encoder.encode(curr['locations'])
+		curr.pop("_id", None)
+		return '{0}({1})'.format(callback, convertToDict(curr))
 
 
 if __name__ == '__main__':

@@ -15,7 +15,7 @@ var stateFill = {1:'Alabama',2:'Alaska',4:'Arizona',5:'Arkansas',6:'California',
 var width = 960,
     height = 600;
 
-//store the values we will be using from our imported file in two maps
+//store the values we will be using from our imported file in four maps
 var wordPercentageById = d3.map();
 var followerById = d3.map();
 var wordCountById = d3.map();
@@ -38,11 +38,9 @@ var xScale = d3.scale.linear();
 //tooltip
 var tip = d3.tip();
 
-var word = 'syria';
-console.log('now');
-
 //load files in parallel with Queue.js library
-queue()
+var draw = function() {
+  queue()
     .defer(function(url, callback) {
       d3.json(url, function(error, result) {
         console.log("map ready");
@@ -78,11 +76,56 @@ queue()
       });
     }, './syria.json')
     .await(ready);
+};
+
+
+var redraw = function() {
+  //draws the US map using the map.json file
+  queue()
+    .defer(function(url, callback) {
+      d3.json(url, function(error, result) {
+        console.log("map ready");
+        callback(error, result);
+      });
+    }, "./map.json") //the json for the US map
+    .await(ready);
+};
+
+
+var fillData = function(json) {
+  //fills in the map with the json file generated for the searched word
+  json.locations.forEach(function(curr) {
+    wordPercentageById.set(curr.location, +curr.wordPercentage); 
+    followerById.set(curr.location, +curr.avgFollowerCount);
+    wordCountById.set(curr.location, +curr.wordCount);
+    tweetCountById.set(curr.location, +curr.tweetCount);
+    tip.attr({
+      'class': 'd3-tip'
+    })  
+    //the tip offset can change based on the browser  
+    .offset(getOffset())     
+    .html(function(data){
+      //displaying the info for the pop up when mousing over a state
+      return "<span style='color:#66ccff'>" + stateFill[data.id] 
+        + "</span><br><span>Percentage of Word Occurrence:</span> <span style='color:#A9E2F3' 'text-align: center'>" 
+        + wordPercentageById.get(data.id) 
+        + "</span>,<br><span>Total Number of Tweets:</span> <span style='color:#A9E2F3' 'text-align: center'>" 
+        + tweetCountById.get(data.id) 
+        + "</span>,<br><span>Total Number of Tweets Containing Word:</span> <span style='color:#A9E2F3' 'text-align: center'>" 
+        + wordCountById.get(data.id) 
+        + "</span>,<br><span>Average Follower Count:</span> <span style='color:#A9E2F3'>" 
+        + followerById.get(data.id) + "</span>";
+    });
+    svg.call(tip);
+  })
+};
+
 
 function getOffset() {
   //if chrome or ff, no offset -- otherwise, need offset
   return [0,0];
 }
+
 
 function getJSON(word) {
   $.ajax({
@@ -90,19 +133,25 @@ function getJSON(word) {
     url: "http://0.0.0.0:5000/word",
     data: {'word': word},
     async: false,
-    success: function(json) {
-      console.log(json);
-      return json;
+    success: function(obj) {
+      console.log(obj);
+      fillData(obj);
+      redraw();
+      return obj;
     },
-    complete: function() {
-      console.log('request complete');
+    error: function(err) {
+      console.log(err);
+    },
+    complete: function(xhr, status) {
+      console.log('request complete, status: ' + status);
     }
   });
 }
 
-function ready(error, us) {
+
+function ready(error, us) {   
   console.log("ready");
-  if (error) throw error;
+  if (error) console.log(error);  //not getting past here
 
   //find the max of all word percentage values
   var max = wordPercentageById.values().reduce(function(p, v) { return p > v ? p : v; });
@@ -122,12 +171,14 @@ function ready(error, us) {
      .attr("fill", function(d) {
         curr = wordPercentageById.get(d.id);
         if(curr == 0) {
-          return d3.hsl("#ffffff");
+          //if wordPercentage = 0, the state should be colored white
+          return d3.hsl("#ffffff"); 
         } else {
           return d3.hsl(200, .5, xScale(wordPercentageById.get(d.id))); 
         }
       })
      .attr("d", path)
+     //showing the stats for a certain state when mousing over that state
      .on('mouseover', tip.show)
      .on('mouseout', tip.hide);
 
@@ -142,14 +193,15 @@ window.addEventListener("load", function(){
   var searchInput = document.getElementById("searchInput");  
   var h2 = document.getElementById("h2");
   var text = "";
-  //allow input into search bar  
+  //Event listener to keep track of input into search bar  
+  //text is the searched word
   searchInput.addEventListener("input", function(event){
     text = searchInput.value;
   });
 
-  //change the title of the page based on search input
-    searchButton.addEventListener("click", function(event){
-       h2.innerHTML = "Results for Tweets Containing the Word '" + text + "'";
-       console.log(getJSON(text));
-    });
+  //Event listener change the title of the page based on search input
+  searchButton.addEventListener("click", function(event){
+      h2.innerHTML = "Results for Tweets Containing the Word '" + text + "'";
+      getJSON(text);
+  });
 });
