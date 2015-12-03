@@ -38,6 +38,9 @@ var xScale = d3.scale.linear();
 //tooltip
 var tip = d3.tip();
 
+var word = 'syria';
+console.log('now');
+
 //load files in parallel with Queue.js library
 queue()
     .defer(function(url, callback) {
@@ -54,12 +57,10 @@ queue()
           followerById.set(curr.location, +curr.avgFollowerCount);
           wordCountById.set(curr.location, +curr.wordCount);
           tweetCountById.set(curr.location, +curr.tweetCount);
-
-
           tip.attr({
                 'class': 'd3-tip'
               })    
-             .offset([0, 75])     
+             .offset(getOffset())     
              .html(function(data){
                 return "<span style='color:#66ccff'>" + stateFill[data.id] 
                   + "</span><br><span>Percentage of Word Occurrence:</span> <span style='color:#A9E2F3' 'text-align: center'>" 
@@ -72,15 +73,32 @@ queue()
                   + followerById.get(data.id) + "</span>";
              });
           svg.call(tip);
-
         })
         callback(error, d);
       });
-        //console.log("complete");
-    }, "./syria.json")
+    }, './syria.json')
     .await(ready);
 
+function getOffset() {
+  //if chrome or ff, no offset -- otherwise, need offset
+  return [0,0];
+}
 
+function getJSON(word) {
+  $.ajax({
+    dataType: 'jsonp',
+    url: "http://0.0.0.0:5000/word",
+    data: {'word': word},
+    async: false,
+    success: function(json) {
+      console.log(json);
+      return json;
+    },
+    complete: function() {
+      console.log('request complete');
+    }
+  });
+}
 
 function ready(error, us) {
   console.log("ready");
@@ -112,6 +130,26 @@ function ready(error, us) {
      .attr("d", path)
      .on('mouseover', tip.show)
      .on('mouseout', tip.hide);
+
+
 }
 
 d3.select(self.frameElement).style("height", height + "px");
+
+//load functionality for searching when loading the screen
+window.addEventListener("load", function(){
+  var searchButton = document.getElementById("searchButton");
+  var searchInput = document.getElementById("searchInput");  
+  var h2 = document.getElementById("h2");
+  var text = "";
+  //allow input into search bar  
+  searchInput.addEventListener("input", function(event){
+    text = searchInput.value;
+  });
+
+  //change the title of the page based on search input
+    searchButton.addEventListener("click", function(event){
+       h2.innerHTML = "Results for Tweets Containing the Word '" + text + "'";
+       console.log(getJSON(text));
+    });
+});
