@@ -1,12 +1,13 @@
-//script to write a sample file to produce data for the visualization
-
 from pymongo import MongoClient
 from decimal import *
+from flask import Flask, request
 from json import JSONEncoder
 from json import JSONDecoder
 from json import dump
 import os
 import sys
+
+app = Flask(__name__)
 
 #connect on the default host, which is where we are running MongoDB listener
 client = MongoClient()
@@ -42,6 +43,15 @@ class ParseError(Exception):
     def __init__(self, expr, msg):
         self.expr = expr
         self.msg = msg
+
+def getCount(collection):
+	return collection.count()
+
+def extractTweets(word, collection):
+	for tweet in collection:
+		find = " " + word + " "
+		if(find in tweet['tweet']):
+			data.append(parseTweet(tweet))
 
 def filterTweets(word):
 	""" Filter the tweets that we want to include in our file """
@@ -87,17 +97,16 @@ def structureDict(properties, data, word):
 		obj['locations'].append(currDict)
 	return obj
 
-def main(word):
+@app.route('/word', methods=['GET'])
+def main():
 	""" If we find that the file referring to a given word has already been created
 		we simply retrieve it from the database. Otherwise, generate the file """
+	word = request.args.get('word')
 	curr = words.find_one({'word': word})
-	f = open(word + ".json", "w")
 	if(curr == None):
 		tweetData = filterTweets(word)
 		properties = ["location", "wordCount", "avgFollowerCount", "tweetCount", "wordPercentage"]
 		jsonDict = structureDict(properties, tweetData, word)
-		dump(jsonDict, f)
-		f.close()
 		words.insert_one(jsonDict)
 		return encoder.encode(jsonDict['locations'])
 	else:
@@ -105,6 +114,4 @@ def main(word):
 
 
 if __name__ == '__main__':
-	arguments = sys.argv
-	if(len(arguments) == 2): 
-		main(arguments[1])
+	app.run()
