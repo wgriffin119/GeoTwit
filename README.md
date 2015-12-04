@@ -3,7 +3,9 @@ Geographical visualization of tweets collected using tweepy and pymongo and serv
 
 ![GeoTweet UI](https://cloud.githubusercontent.com/assets/6421150/11602695/419c3c78-9aaa-11e5-9e80-58ffe73c1cfb.png)
 
-In order to run, first install MongoDB, and run an instance.
+In order to run, first install MongoDB and run an instance.
+
+So that we can use our python files in the future, also make sure that the files in requirements.txt are installed by pipy (tweepy, pymongo, and Flask).
 
 Make sure that MongoDB is listening on the default host (localhost) and port (27017).
 
