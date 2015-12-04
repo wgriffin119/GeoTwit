@@ -1,6 +1,7 @@
 # GeoTwit
 Geographical visualization of tweets collected using tweepy and pymongo and served using Flask -- utilizing D3.js, TopoJSON, and Queue.js for the graphical aspect.
 
+![GeoTweet UI](https://cloud.githubusercontent.com/assets/6421150/11602695/419c3c78-9aaa-11e5-9e80-58ffe73c1cfb.png)
 
 In order to run, first install MongoDB, and run an instance.
 
