@@ -1,0 +1,4 @@
+GeoTweet
+pymongo==3.0.3
+Flask==0.10.1
+tweepy==3.4.0
