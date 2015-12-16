@@ -10,6 +10,7 @@ import sys
 app = Flask(__name__)
 
 #connect on the default host, which is where we are running MongoDB listener
+#make sure that Mongo is listening on port 27017
 client = MongoClient()
 database = client.db
 
@@ -27,6 +28,7 @@ encoder = JSONEncoder()
 #decoder to convert JSON file to Python dictionary
 decoder = JSONDecoder()
 
+#python dictionary to map state name abbreviations to the number associated with that state in the d3 US map
 stateFill = {'AL':1,'AK':2, 'a': 3, 'AZ':4,'AR':5,'CA':6, 'b': 7, 'CO':8,'CT':9,'DE':10,'DC':11,'FL':12,'GA':13,
              'c': 14, 'HI':15,'ID':16,'IL':17,'IN':18,'IA':19,'KS':20,'KY':21,'LA':22,'ME':23,'MD':24,
              'MA':25,'MI':26,'MN':27,'MS':28,'MO':29,'MT':30,'NE':31,'NV':32,'NH':33,'NJ':34,
@@ -44,10 +46,9 @@ class ParseError(Exception):
         self.expr = expr
         self.msg = msg
 
-def getCount(collection):
-	return collection.count()
 
 def extractTweets(word, collection):
+	'''finding all tweets that contain a specified word'''
 	for tweet in collection:
 		find = " " + word + " "
 		if(find in tweet['tweet']):
@@ -98,6 +99,7 @@ def structureDict(properties, data, word):
 	return obj
 
 def convertToDict(json):
+	"""Converts a JSON file back into a python dictionary"""
 	newDict = {}
 	newDict['word'] = str(json['word'])
 	newLocations = []

@@ -1,6 +1,8 @@
-//sample heatmap visualization, to be used dynamically with tweets we have stored in Mongo
+//heatmap visualization, to be used dynamically with tweets we have stored in Mongo.
+//Displays the choropleth US map filled in with the frequency of a specified word's occurence
+//in tweets for each state on the map. 
 
-//mapping of state indices in our map JSON file to state names
+//mapping of state indices in our map.JSON file to full state names
 var stateFill = {1:'Alabama',2:'Alaska',4:'Arizona',5:'Arkansas',6:'California',8:'Colorado',
                  9:'Connecticut',10:'Delaware',11:'District of Columbia',12:'Florida',13:'Georgia',
                  15:'Hawaii',16:'Idaho',17:'Illinois',18:'Indiana',19:'Iowa',20:'Kansas',
@@ -15,7 +17,7 @@ var stateFill = {1:'Alabama',2:'Alaska',4:'Arizona',5:'Arkansas',6:'California',
 var width = 960,
     height = 600;
 
-//store the values we will be using from our imported file in four maps
+//store the values we will be using from our imported file into four maps
 var wordPercentageById = d3.map();
 var followerById = d3.map();
 var wordCountById = d3.map();
@@ -38,7 +40,8 @@ var xScale = d3.scale.linear();
 //tooltip
 var tip = d3.tip();
 
-//load files in parallel with Queue.js library
+//load files in parallel with Queue.js library -- used for
+//.json files rather than entries in Mongo
 var draw = function() {
   queue()
     .defer(function(url, callback) {
@@ -93,7 +96,7 @@ var redraw = function() {
 
 
 var fillData = function(json) {
-  //fills in the map with the json file generated for the searched word
+  //fills in the d3 map with the json file generated for the searched word
   json.locations.forEach(function(curr) {
     wordPercentageById.set(curr.location, +curr.wordPercentage); 
     followerById.set(curr.location, +curr.avgFollowerCount);
@@ -128,12 +131,18 @@ function getOffset() {
 
 
 function getJSON(word) {
+  //Using a jquery ajax request to fetch data being served by the python web server
+  //If it has been fetched correctly, the html on the webpage is updated with the 
+  //searched word and the map is drawn using this data. 
   $.ajax({
     dataType: 'jsonp',
+    //ensure that python script "mongo_server.py" is running and listening on port 5000
     url: "http://0.0.0.0:5000/word",
     data: {'word': word},
     async: false,
-    success: function(obj) {
+    success: function(obj) {  
+  	  var h2 = document.getElementById("h2");
+      h2.innerHTML = "Results for Tweets Containing the Word '<b>" + word + "</b>'";
       console.log(obj);
       fillData(obj);
       redraw();
@@ -150,8 +159,10 @@ function getJSON(word) {
 
 
 function ready(error, us) {   
+  //Once we have fetched all of the JSON files, we call the ready function
+  //when we are ready to draw the US map.
   console.log("ready");
-  if (error) console.log(error);  //not getting past here
+  if (error) console.log(error);
 
   //find the max of all word percentage values
   var max = wordPercentageById.values().reduce(function(p, v) { return p > v ? p : v; });
@@ -185,13 +196,19 @@ function ready(error, us) {
 
 }
 
+function submit(word) {
+	//Changes the webpage HTML to display a waiting message while results 
+	//are being fetched for a word not previously searched.
+  	document.getElementById("h2").innerHTML = "Fetching results...";
+    getJSON(word.toLowerCase());
+};
+
 d3.select(self.frameElement).style("height", height + "px");
 
 //load functionality for searching when loading the screen
 window.addEventListener("load", function(){
   var searchButton = document.getElementById("searchButton");
-  var searchInput = document.getElementById("searchInput");  
-  var h2 = document.getElementById("h2");
+  var searchInput = document.getElementById("searchInput");
   var text = "";
   //Event listener to keep track of input into search bar  
   //text is the searched word
@@ -199,9 +216,14 @@ window.addEventListener("load", function(){
     text = searchInput.value;
   });
 
-  //Event listener change the title of the page based on search input
+  //Event listener load the graph when the search button is clicked
   searchButton.addEventListener("click", function(event){
-      h2.innerHTML = "Results for Tweets Containing the Word '" + text + "'";
-      getJSON(text);
+  	  submit(text);
+  });
+
+  //event listener to load the graph when the enter button is pressed
+  $("#custom-search-form").submit(function() {
+    submit(text);
+    return false;
   });
 });
