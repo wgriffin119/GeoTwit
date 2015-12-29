@@ -15,4 +15,4 @@ Once you are done collecting tweets, you can run mongo_server.py.
 
 Make sure that MongoDB is still listening on the default host and port and that mongo_server is listening on the localhost and port 5000.
 
-Once you have both of these running, you can run the visualization folder as a server (e.g. with python command line tool "python -m SimpleHTTPServer" (2.x) or "python http.server" (3.x) and open up the visualization, at which point you should be able to inspect word frequency in tweets across the United States.
+Once you have both of these running, you can run the visualization folder as a server (e.g. with python command line tool "python -m SimpleHTTPServer" (2.x) or "python http.server" (3.x) and open up the visualization, at which point you should be able to inspect word frequency in tweets across the United States. You may need to change offset in getOffset() in map.js depending on what browser will using (it changes based on CSS padding/margins).
