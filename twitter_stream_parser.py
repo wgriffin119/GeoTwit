@@ -22,10 +22,10 @@ stateAbbreviationMap = {'Alaska':'AK','Alabama':'AL','Arkansas':'AR','Arizona':'
 #our consumer key and secret for our application to receive tweets from the public stream
 #these will not actually be used for anything except to listen for tweets
 consumer_key="ldtUZH7082RW6nZKkTILmC3p7"
-consumer_secret="vd0hjyt7BX9fFZQ1ShmNkaS6lk55kTs0RbapV7reEjbGSmnrUf"
+consumer_secret=""
 
 access_token="870183469-83KQSCFJF16C6i3dEhRWBW63WKXhahU5SLoOQ7TM"
-access_token_secret="Z60oe2vJvUTk30EUApwewW61fB4eV5PGQ05Nllys2GcQT"
+access_token_secret=""
 
 #connect on the default host, which is where we are running MongoDB listener
 client = MongoClient()
